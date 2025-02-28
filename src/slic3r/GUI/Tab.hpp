@@ -357,6 +357,8 @@ public:
 	void		on_roll_back_value(const bool to_sys = false);
 
 	PageShp		add_options_page(const wxString& title, const std::string& icon, bool is_extruder_pages = false);
+	PageShp		get_page(const wxString& title);
+	std::vector<PageShp> get_pages() { return m_pages; }
 	static wxString translate_category(const wxString& title, Preset::Type preset_type);
 
 	virtual void	OnActivate();

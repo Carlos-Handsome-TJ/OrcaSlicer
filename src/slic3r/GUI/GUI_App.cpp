@@ -2620,6 +2620,7 @@ bool GUI_App::on_init_inner()
     m_initialized = true;
 
     flush_logs();
+    parse_args();
 
     BOOST_LOG_TRIVIAL(info) << "finished the gui app init";
     if (m_config_corrupted) {

@@ -449,6 +449,8 @@ set(lisbslic3r_sources
     calib.cpp
         GCode/Thumbnails.cpp
         GCode/Thumbnails.hpp
+    AutomationMgr.hpp
+    AutomationMgr.cpp
 )
 
 if (APPLE)

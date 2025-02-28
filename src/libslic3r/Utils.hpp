@@ -18,6 +18,7 @@
 #include <openssl/md5.h>
 
 #include "libslic3r.h"
+#include "AutomationMgr.hpp"
 
 //define CLI errors
 
@@ -453,6 +454,53 @@ public:
     }
 
     void reset() { closure = Closure(); }
+};
+
+#define PERFORMANCE_TEST
+
+#ifdef PERFORMANCE_TEST
+// define timer
+#define DEFINE_PERFORMANCE_TEST(name) PerformanceTestTimer timer(name)
+#else
+// nothing
+#define DEFINE_PERFORMANCE_TEST(name)
+#endif
+
+class PerformanceTestTimer
+{
+public:
+    PerformanceTestTimer(const std::string& scope_name)
+    {
+        name               = scope_name;
+        start_time         = std::chrono::high_resolution_clock::now();
+        current_start_time = AutomationMgr::getCurrentTime();
+    }
+
+    ~PerformanceTestTimer()
+    {
+        end_time         = std::chrono::high_resolution_clock::now();
+        current_end_time = AutomationMgr::getCurrentTime();
+        auto ms          = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+
+        // if automatic test:
+        if (AutomationMgr::enabled()) {
+            auto start_time_t = std::chrono::system_clock::to_time_t(
+                std::chrono::system_clock::now() +
+                std::chrono::duration_cast<std::chrono::system_clock::duration>(start_time.time_since_epoch()));
+            std::tm*    timeinfo   = std::localtime(&start_time_t);
+            auto        start_ms   = std::chrono::duration_cast<std::chrono::milliseconds>(start_time.time_since_epoch()).count() % 1000;
+            std::string fileName   = AutomationMgr::getFileName();
+            std::string logContent = "[fileName: " + fileName + " step: " + name + " used_time: " + std::to_string(ms) + " ms] ";
+            AutomationMgr::outputLog(logContent, 0);
+        }
+    }
+
+private:
+    std::string                                                 name;
+    std::chrono::time_point<std::chrono::high_resolution_clock> start_time;
+    std::chrono::time_point<std::chrono::high_resolution_clock> end_time;
+    std::string                                                 current_start_time;
+    std::string                                                 current_end_time;
 };
 
 // Shorten the dhms time by removing the seconds, rounding the dhm to full minutes

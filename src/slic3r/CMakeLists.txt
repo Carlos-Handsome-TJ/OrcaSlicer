@@ -183,6 +183,7 @@ set(SLIC3R_GUI_SOURCES
     GUI/GUI_Preview.hpp
     GUI/GUI_App.cpp
     GUI/GUI_App.hpp
+    GUI/GUI_App_Parse.cpp
     GUI/GUI_Utils.cpp
     GUI/GUI_Utils.hpp
     GUI/GUI_Geometry.cpp
@@ -556,6 +557,8 @@ set(SLIC3R_GUI_SOURCES
     Utils/Obico.hpp
     Utils/Flashforge.cpp
     Utils/Flashforge.hpp
+    # Utils/ExportMetas.hpps
+    # Utils/ExportMetas.cpp
 
     GUI/OAuthDialog.cpp
     GUI/OAuthDialog.hpp
