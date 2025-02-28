@@ -137,8 +137,9 @@ namespace Slic3r
 	{
 		if (g_automationType == AutomationType::GCode)
 		{
-            HANDLE hprocess = GetCurrentProcess();
-            TerminateProcess(hprocess, 1);
+            //HANDLE hprocess = GetCurrentProcess();
+            //TerminateProcess(hprocess, 1);
+            exit(0);
 		}
 	}
 }

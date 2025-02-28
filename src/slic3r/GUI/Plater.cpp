@@ -6945,6 +6945,12 @@ void Plater::priv::on_process_completed(SlicingProcessCompletedEvent &evt)
             }
         }
     }
+    // 切片完成之后，退出程序
+    if (is_finished) {
+        if (Slic3r::AutomationMgr::enabled()) {
+            AutomationMgr::endFunction();
+        }
+    }
     BOOST_LOG_TRIVIAL(debug) << __FUNCTION__ << boost::format(", exit.");
 }
 
@@ -8897,6 +8903,11 @@ void Plater::load_project(wxString const& filename2,
 
     BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << __LINE__ << " load project done";
     m_loading_project = false;
+
+    if (AutomationMgr::enabled()) {
+        SimpleEvent evt = SimpleEvent(EVT_GLTOOLBAR_SLICE_ALL);
+        this->p->on_action_slice_all(evt);
+    }
 }
 
 // BBS: save logic
