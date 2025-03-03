@@ -220,6 +220,7 @@ void BackgroundSlicingProcess::process_fff()
 		}
 	}
 	else {
+		DEFINE_PERFORMANCE_TEST("Slicing & G-code generation");
 		//BBS: reset the gcode before reload_print in slicing_completed event processing
 		//FIX the gcode rename failed issue
 		BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(" %1%: will start slicing, reset gcode_result %2% firstly")%__LINE__%m_gcode_result;

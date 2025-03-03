@@ -316,6 +316,7 @@ private:
     std::string     get_local_models_path();
     bool            OnInit() override;
     int             OnExit() override;
+    void            OnUnhandledException() override;
     bool            initialized() const { return m_initialized; }
     inline bool     is_enable_multi_machine() { return this->app_config&& this->app_config->get("enable_multi_machine") == "true"; }
 

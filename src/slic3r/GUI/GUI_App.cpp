@@ -828,6 +828,9 @@ void GUI_App::post_init()
                 for (auto& file : this->init_params->input_files) {
                     input_files.push_back(wxString::FromUTF8(file));
                 }
+                if (AutomationMgr::enabled()) {
+                    input_files.clear();
+                }
                 this->plater()->set_project_filename(_L("Untitled"));
                 this->plater()->load_files(input_files);
                 try {
@@ -1053,6 +1056,24 @@ void GUI_App::post_init()
     // Sets window property to mainframe so other instances can indentify it.
     OtherInstanceMessageHandler::init_windows_properties(mainframe, m_instance_hash_int);
 #endif //WIN32
+
+
+#ifdef _WIN32
+    std::function<void(std::string)> callback = [this](std::string _3mf_file) {
+        wxString wxStr(_3mf_file.c_str(), wxConvWhateverWorks);
+        this->mainframe->open_recent_project(0, wxStr);
+    };
+    if (AutomationMgr::enabled()) {
+        // change string to wstring
+        std::wstring _3mf_file = boost::locale::conv::to_utf<wchar_t>(AutomationMgr::get3mfPath(), "UTF-8");
+        if (!std::filesystem::exists(_3mf_file)) {
+            AutomationMgr::outputLog("file is empty!", 1);
+            AutomationMgr::endFunction();
+            return;
+        }
+        callback(AutomationMgr::get3mfPath());
+    }
+#endif 
 }
 
 wxDEFINE_EVENT(EVT_ENTER_FORCE_UPGRADE, wxCommandEvent);
@@ -2134,6 +2155,16 @@ int GUI_App::OnExit()
     }
 
     return wxApp::OnExit();
+}
+
+void GUI_App::OnUnhandledException()
+{
+    if (AutomationMgr::enabled()) {
+        AutomationMgr::outputLog("has catch exception", 1);
+        AutomationMgr::endFunction();
+        return;
+    }
+    wxApp::OnUnhandledException();
 }
 
 class wxBoostLog : public wxLog

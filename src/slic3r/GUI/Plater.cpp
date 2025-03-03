@@ -3526,6 +3526,7 @@ void read_binary_stl(const std::string& filename, std::string& model_id, std::st
 // BBS: backup & restore
 std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_files, LoadStrategy strategy, bool ask_multi)
 {
+    DEFINE_PERFORMANCE_TEST("Loading File");
     std::vector<size_t> empty_result;
     bool dlg_cont = true;
     bool is_user_cancel = false;
@@ -3533,7 +3534,6 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
     int current_width, current_depth, current_height;
 
     if (input_files.empty()) { return std::vector<size_t>(); }
-    
     // SoftFever: ugly fix so we can exist pa calib mode
     background_process.fff_print()->calib_mode() = CalibMode::Calib_None;
 
@@ -8905,6 +8905,14 @@ void Plater::load_project(wxString const& filename2,
     m_loading_project = false;
 
     if (AutomationMgr::enabled()) {
+        if (res.empty()) {
+            AutomationMgr::outputLog("Failed to load project file", 1);
+            AutomationMgr::endFunction();
+        }
+        if (!wxGetApp().mainframe->get_enable_slice_status()) {
+            AutomationMgr::outputLog("Slice is disabled", 1);
+            AutomationMgr::endFunction();
+        }
         SimpleEvent evt = SimpleEvent(EVT_GLTOOLBAR_SLICE_ALL);
         this->p->on_action_slice_all(evt);
     }
