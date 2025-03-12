@@ -826,6 +826,11 @@ inline int UnsavedChangesDialog::ShowModal()
         m_exit_action = Action(result);
         return 0;
     }
+#ifdef _WIN32
+    if (AutomationMgr::enabled()) { // 自动化脚本屏蔽弹窗
+            return 0;
+        }
+#endif
     int r = wxDialog::ShowModal();
     if (r != wxID_CANCEL && dynamic_cast<::CheckBox*>(FindWindowById(wxID_APPLY))->GetValue()) {
         wxGetApp().app_config->set(choise_key, std::to_string(int(m_exit_action)));

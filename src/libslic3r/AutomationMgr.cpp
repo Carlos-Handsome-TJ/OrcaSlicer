@@ -52,42 +52,47 @@ namespace Slic3r
 	}
 
     void AutomationMgr::outputLog(const std::string& logContent, const int& logType)
-	{
-        // output log   0: slice log  1: file error log 
-        std::string filePath;
-        switch (logType) {
-			case 0: filePath = Slic3r::data_dir() + "/automation/sliceTime.txt"; break;
-			case 1: filePath = Slic3r::data_dir() + "/automation/error.txt"; break;
+        {
+            // output log   0: slice log  1: file error log  2:timeout  3:warnnings
+            std::string filePath;
+            switch (logType) {
+            case 0: filePath = Slic3r::data_dir() + "/automation/sliceTime.txt"; break;
+            case 1: filePath = Slic3r::data_dir() + "/automation/error.txt"; break;
             case 2: filePath = Slic3r::data_dir() + "/automation/timeout.txt"; break;
-	        default: break;
+            case 3: filePath = Slic3r ::data_dir() + "/automation/warnnings.txt"; break;
+            default: break;
+            }
+            if (!std::filesystem::exists(filePath)) {
+                std::filesystem::create_directories(Slic3r::data_dir() + "/automation");
+            }
+            std::ofstream log_file(filePath, std::ios_base::app);
+            if (!log_file.is_open()) {
+                std::cerr << "Failed to open the log" << std::endl;
+                return;
+            }
+            std::string        fileName = getFileName();
+            std::ostringstream log_stream;
+            // output log   0: slice log  1: file error log  2: input file log 3:
+            switch (logType) {
+            case 0:
+                log_stream << logContent << std::endl;
+                log_file << log_stream.str() << std::endl;
+                break;
+            case 1:
+                log_stream << "Error File: " << fileName << "  " << logContent;
+                log_file << log_stream.str() << std::endl;
+                break;
+            case 2:
+                log_stream << "Slice Timeout File: " << fileName << "  " << logContent;
+                log_file << log_stream.str() << std::endl;
+                break;
+            case 3:
+                log_stream << "Warnings File: " << fileName << "  " << logContent;
+                log_file << log_stream.str() << std::endl;
+                break;
+            default: break;
         }
-        if (!std::filesystem::exists(filePath)) {
-            std::filesystem::create_directories(Slic3r::data_dir() + "/automation");
-        }
-		std::ofstream log_file(filePath, std::ios_base::app);
-		if (!log_file.is_open()) {
-            std::cerr << "Failed to open the log" << std::endl;
-            return;
-		}
-		std::string fileName = getFileName();
-        std::ostringstream log_stream;
-		// output log   0: slice log  1: file error log  2: input file log 3: 
-        switch (logType) {
-        case 0: 
-            log_stream << logContent << std::endl;
-			log_file << log_stream.str() << std::endl;
-			break;
-        case 1:
-            log_stream << "Error File: " << fileName << "  " << logContent;
-            log_file << log_stream.str() << std::endl;
-			break;
-        case 2:
-            log_stream << "Slice Timeout File: " << fileName << "  " << logContent;
-            log_file << log_stream.str() << std::endl;
-            break;
-        default: break;
-        }
-	}
+    }
 
     std::string AutomationMgr::getCurrentTime()
     {
@@ -114,14 +119,16 @@ namespace Slic3r
     void AutomationMgr::exportGCode(const std::string& target_file)
     {
         namespace fs = std::filesystem;
-        // change to wstring due to chinese characters may cause errors 
-        std::string _3mf_filename = getFileName();
+        // change to wstring due to chinese characters may cause errors
+        size_t                                           pos                   = target_file.find_last_of("/\\");
+        std::string                                      target_file_temp_name = target_file.substr(pos + 1);
+        std::string                                      _3mf_filename         = getFileName() + target_file_temp_name;
         std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-        std::wstring _3mf_w_filename = converter.from_bytes(_3mf_filename);
+        std::wstring                                     _3mf_w_filename = converter.from_bytes(_3mf_filename);
 
-        fs::path filePath(_3mf_w_filename);
+        fs::path    filePath(_3mf_w_filename);
         std::string _g_code_filename = filePath.stem().string() + ".gcode";
-        std::string destinationDir = Slic3r::data_dir() + "/automation/gcode";
+        std::string destinationDir   = Slic3r::data_dir() + "/automation/gcode";
         if (!fs::exists(destinationDir)) {
             fs::create_directories(destinationDir);
         }

@@ -5087,6 +5087,11 @@ void Plater::priv::process_validation_warning(StringObjectException const &warni
         auto hypertext = (mo || !warning.opt_key.empty()) ? _u8L("Jump to") : "";
         if (mo) hypertext += std::string(" [") + mo->name + "]";
         if (!warning.opt_key.empty()) hypertext += std::string(" (") + warning.opt_key + ")";
+    #ifdef _WIN32
+        if (AutomationMgr::enabled()) {
+            AutomationMgr::outputLog(text, 3);
+        }
+    #endif
 
         // BBS disable support enforcer
         //if (text == "_SUPPORTS_OFF") {
@@ -6803,6 +6808,11 @@ void Plater::priv::on_process_completed(SlicingProcessCompletedEvent &evt)
         }
         has_error = true;
         is_finished = true;
+#ifdef _WIN32
+        if (AutomationMgr::enabled()) {
+            AutomationMgr::outputLog(message.first, 1);
+        }
+#endif
     }
     if (evt.cancelled()) {
         BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(", cancel event, status: %1%") % evt.status();

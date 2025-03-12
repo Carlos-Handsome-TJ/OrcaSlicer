@@ -9490,6 +9490,13 @@ void GLCanvas3D::_set_warning_notification(EWarning warning, bool state)
     default:
         break;
     }
+#ifdef _WIN32
+    if (AutomationMgr::enabled()) {
+        if (state) {
+            AutomationMgr::outputLog(text, 1);
+        }
+    }
+#endif // _WIN32
 }
 
 bool GLCanvas3D::_is_any_volume_outside() const
